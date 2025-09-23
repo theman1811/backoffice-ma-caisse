@@ -25,6 +25,27 @@ export class AppMenu {
                 items: [{ label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] }]
             },
             {
+                label: 'Gestion clients et boutiques',
+                items: [
+                    {label: 'Clients', icon: 'pi pi-fw pi-users', routerLink: ['/gestion/clients']},
+                    {label: 'Boutiques', icon: 'pi pi-fw pi-shop', routerLink: ['/gestion/boutiques']}
+                ]
+            },
+            {
+                label: "Administration",
+                items: [
+                    {label: 'Administrateurs', icon: 'pi pi-fw pi-shield', routerLink: ['/administration/administrateurs']},
+                    {label: 'Facturation', icon: 'pi pi-fw pi-credit-card', routerLink: ['/administration/facturation']}
+                ]
+            },
+            {
+                label: 'Prévision',
+                items: [
+                    {label: 'Analytiques', icon: 'pi pi-fw pi-chart-bar', routerLink: ['/prevision/analytiques']},
+                    {label: 'Transactions', icon: 'pi pi-fw pi-money-bill', routerLink: ['/prevision/transactions']}
+                ]
+            },
+            {
                 label: 'UI Components',
                 items: [
                     { label: 'Form Layout', icon: 'pi pi-fw pi-id-card', routerLink: ['/uikit/formlayout'] },
