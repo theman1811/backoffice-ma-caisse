@@ -1,0 +1,50 @@
+// Styles personnalisés pour le composant clients
+:host {
+  display: block;
+}
+
+// Amélioration de l'apparence de la table PrimeNG
+::ng-deep {
+  .p-datatable {
+    .p-datatable-thead > tr > th {
+      background-color: #f9fafb !important;
+      border-color: #e5e7eb !important;
+      color: #374151 !important;
+      font-weight: 600;
+    }
+    
+    .p-datatable-tbody > tr {
+      border-color: #f3f4f6 !important;
+      
+      &:hover {
+        background-color: #f9fafb !important;
+      }
+    }
+    
+    .p-datatable-tbody > tr > td {
+      border-color: #f3f4f6 !important;
+      padding: 1rem !important;
+    }
+  }
+  
+  // Styles pour les boutons
+  .p-button {
+    &.p-button-sm {
+      padding: 0.5rem 1rem !important;
+      font-size: 0.875rem !important;
+    }
+  }
+  
+  // Styles pour les tags
+  .p-tag {
+    &.p-tag-success {
+      background-color: #10b981 !important;
+      color: white !important;
+    }
+    
+    &.p-tag-secondary {
+      background-color: #6b7280 !important;
+      color: white !important;
+    }
+  }
+}

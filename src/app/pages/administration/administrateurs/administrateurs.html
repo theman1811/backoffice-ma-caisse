@@ -1,1 +1,66 @@
-<p>administrateurs works!</p>
+<div class="p-6 bg-gray-50 min-h-screen">
+  <!-- En-tête de la page -->
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Liste des administrateurs</h1>
+    <p class="text-gray-600">Gérez les accès et permissions des administrateurs de la plateforme</p>
+  </div>
+
+  <!-- Table des administrateurs -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <p-table [value]="administrateurs" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
+      <ng-template pTemplate="header">
+        <tr class="bg-gray-50">
+          <th class="text-left p-4 font-semibold text-gray-700">Nom</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Email</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Rôle</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Statut</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Dernière connexion</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Créé le</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Actions</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-administrateur>
+        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+          <td class="p-4 text-gray-800 font-medium">{{ administrateur.nom }}</td>
+          <td class="p-4 text-gray-600">{{ administrateur.email }}</td>
+          <td class="p-4">
+            <p-tag 
+              [value]="administrateur.role" 
+              [severity]="getRoleSeverity(administrateur.role)"
+              [rounded]="true">
+            </p-tag>
+          </td>
+          <td class="p-4">
+            <p-tag 
+              [value]="administrateur.statut" 
+              [severity]="administrateur.statut === 'Actif' ? 'success' : 'secondary'"
+              [rounded]="true">
+            </p-tag>
+          </td>
+          <td class="p-4 text-gray-600">{{ administrateur.derniereConnexion }}</td>
+          <td class="p-4 text-gray-600">{{ administrateur.creeLe }}</td>
+          <td class="p-4">
+            <div class="flex gap-2">
+              <p-button 
+                icon="pi pi-pencil"
+                [size]="'small'"
+                severity="info"
+                [text]="true"
+                (onClick)="editAdministrateur(administrateur)"
+                styleClass="p-button-sm">
+              </p-button>
+              <p-button 
+                icon="pi pi-trash"
+                [size]="'small'"
+                severity="danger"
+                [text]="true"
+                (onClick)="deleteAdministrateur(administrateur)"
+                styleClass="p-button-sm">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </div>
+</div>
