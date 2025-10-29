@@ -1,27 +1,35 @@
 <div class="p-6 bg-gray-50 min-h-screen">
   <!-- En-tête de la page -->
+
+  <p-toast/>
+  <p-confirm-dialog/>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-2">Liste des administrateurs</h1>
     <p class="text-gray-600">Gérez les accès et permissions des administrateurs de la plateforme</p>
+    <!-- <div class="flex justify-end">
+      <p-button label="Créer un admin" severity="info" (click)="openDialog()"/>
+    </div> -->
   </div>
 
   <!-- Table des administrateurs -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <p-table [value]="administrateurs" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
+    <p-table [value]="tabAdministrators" [tableStyle]="{'min-width': '80rem'}" styleClass="p-datatable-sm">
       <ng-template pTemplate="header">
         <tr class="bg-gray-50">
-          <th class="text-left p-4 font-semibold text-gray-700">Nom</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Nom complet</th>
+        
           <th class="text-left p-4 font-semibold text-gray-700">Email</th>
           <th class="text-left p-4 font-semibold text-gray-700">Rôle</th>
           <th class="text-left p-4 font-semibold text-gray-700">Statut</th>
-          <th class="text-left p-4 font-semibold text-gray-700">Dernière connexion</th>
+          
           <th class="text-left p-4 font-semibold text-gray-700">Créé le</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Modifié le</th>
           <th class="text-left p-4 font-semibold text-gray-700">Actions</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-administrateur>
         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-          <td class="p-4 text-gray-800 font-medium">{{ administrateur.nom }}</td>
+          <td class="p-4 text-gray-800 font-medium">{{ administrateur.first_name +" "+ administrateur?.last_name }}</td>
           <td class="p-4 text-gray-600">{{ administrateur.email }}</td>
           <td class="p-4">
             <p-tag 
@@ -32,13 +40,14 @@
           </td>
           <td class="p-4">
             <p-tag 
-              [value]="administrateur.statut" 
-              [severity]="administrateur.statut === 'Actif' ? 'success' : 'secondary'"
+              [value]="administrateur.statut ? 'Actif' : 'Inactif' " 
+              [severity]="administrateur.statut === true ? 'success' : 'secondary'"
               [rounded]="true">
             </p-tag>
           </td>
-          <td class="p-4 text-gray-600">{{ administrateur.derniereConnexion }}</td>
-          <td class="p-4 text-gray-600">{{ administrateur.creeLe }}</td>
+          
+          <td class="p-4 text-gray-600">{{ administrateur.created_at }}</td>
+          <td class="p-4 text-gray-600">{{ administrateur.updated_at || 'N/A' }}</td>
           <td class="p-4">
             <div class="flex gap-2">
               <p-button 
@@ -63,4 +72,120 @@
       </ng-template>
     </p-table>
   </div>
+
+  <!-- Dialog pour le formulaire d'ajout/édition -->
+  <p-dialog 
+    [(visible)]="displayDialog" 
+    [modal]="true" 
+    [style]="{width: '40rem'}" 
+    [draggable]="false"
+    [resizable]="false"
+    header="{{ dialogMode === 'add' ? 'Créer un administrateur' : 'Modifier un administrateur' }}">
+    
+    <form [formGroup]="administrateurForm" class="flex flex-col gap-4">
+      <!-- Nom -->
+      <div class="flex flex-col gap-2">
+        <label for="nom" class="text-sm font-semibold text-gray-700">Nom *</label>
+        <input 
+          pInputText 
+          id="nom" 
+          formControlName="nom"
+          placeholder="Entrez le nom"
+          class="w-full"
+          [class.ng-invalid]="administrateurForm.get('nom')?.invalid && administrateurForm.get('nom')?.touched"/>
+          @if(administrateurForm.get('nom')?.invalid && administrateurForm.get('nom')?.touched){
+            <small class="text-red-500">
+              Le nom est requis (minimum 2 caractères)
+            </small>
+          }
+        
+      </div>
+
+      <!-- Prénom -->
+      <div class="flex flex-col gap-2">
+        <label for="prenoms" class="text-sm font-semibold text-gray-700">Prénom(s) *</label>
+        <input 
+          pInputText 
+          id="prenoms" 
+          formControlName="prenoms"
+          placeholder="Entrez le prénom"
+          class="w-full"
+          [class.ng-invalid]="administrateurForm.get('prenoms')?.invalid && administrateurForm.get('prenoms')?.touched"/>
+        @if(administrateurForm.get('prenoms')?.invalid && administrateurForm.get('prenoms')?.touched){
+          <small class="text-red-500">
+            Le prénom est requis (minimum 2 caractères)
+          </small>
+        }
+      </div>
+
+      <!-- Email -->
+      <div class="flex flex-col gap-2">
+        <label for="email" class="text-sm font-semibold text-gray-700">Email *</label>
+        <input 
+          pInputText 
+          id="email" 
+          formControlName="email"
+          type="email"
+          placeholder="entrez@exemple.com"
+          class="w-full"
+          [class.ng-invalid]="administrateurForm.get('email')?.invalid && administrateurForm.get('email')?.touched"/>
+        @if (administrateurForm.get('email')?.invalid && administrateurForm.get('email')?.touched) {
+          <small class="text-red-500">
+            Veuillez saisir un email valide
+          </small>
+        }
+      </div>
+
+      <!-- Contact -->
+      <div class="flex flex-col gap-2">
+        <label for="contact" class="text-sm font-semibold text-gray-700">Contact *</label>
+        <input 
+          pInputText 
+          id="contact" 
+          formControlName="contact"
+          placeholder="+33 6 12 34 56 78"
+          class="w-full"
+          [class.ng-invalid]="administrateurForm.get('contact')?.invalid && administrateurForm.get('contact')?.touched"/>
+        @if (administrateurForm.get('contact')?.invalid && administrateurForm.get('contact')?.touched) {
+          <small class="text-red-500">
+            Veuillez saisir un numéro de téléphone valide
+          </small>
+        }
+      </div>
+
+      <!-- Rôle -->
+      <div class="flex flex-col gap-2">
+        <label for="role" class="text-sm font-semibold text-gray-700">Rôle *</label>
+        <p-select 
+          formControlName="role"
+          [options]="roles"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Sélectionnez un rôle"
+          class="w-full">
+        </p-select>
+        @if (administrateurForm.get('role')?.invalid && administrateurForm.get('role')?.touched) {
+          <small class="text-red-500">
+            Veuillez sélectionner un rôle
+          </small>
+        }
+      </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+      <div class="flex gap-2 justify-end">
+        <p-button 
+          label="Annuler" 
+          severity="secondary" 
+          [text]="true"
+          (click)="closeDialog()">
+        </p-button>
+        <p-button 
+          [label]="dialogMode === 'add' ? 'Créer' : 'Modifier'" 
+          severity="info"
+          (click)="onConfirmAction($event)">
+        </p-button>
+      </div>
+    </ng-template>
+  </p-dialog>
 </div>
