@@ -42,35 +42,7 @@ interface Administrateur {
   styleUrl: './administrateurs.scss'
 })
 export class Administrateurs implements OnInit {
-  administrateurs: Administrateur[] = [
-    {
-      id: 1,
-      nom: 'Alice Dupont',
-      email: 'alice@maboutique.com',
-      role: 'Super Admin',
-      statut: 'Actif',
-      derniereConnexion: '20/03/2024',
-      creeLe: '15/01/2024'
-    },
-    {
-      id: 2,
-      nom: 'Bob Martin',
-      email: 'bob@maboutique.com',
-      role: 'Admin',
-      statut: 'Actif',
-      derniereConnexion: '19/03/2024',
-      creeLe: '10/02/2024'
-    },
-    {
-      id: 3,
-      nom: 'Claire Laurent',
-      email: 'claire@maboutique.com',
-      role: 'Modérateur',
-      statut: 'Inactif',
-      derniereConnexion: '15/03/2024',
-      creeLe: '20/01/2024'
-    }
-  ];
+  
   supabaseService= inject(SupabaseService)
   toastService= inject(ToastService)
   private fb = inject(FormBuilder)
@@ -85,6 +57,7 @@ export class Administrateurs implements OnInit {
     { label: 'User', value: 'user' }
   ];
   confirmationService= inject(ConfirmationService)
+  selectedAdministrateur: User | null= null
 
   constructor(){
     this.administrateurForm = this.fb.group({
@@ -118,62 +91,163 @@ export class Administrateurs implements OnInit {
 
   openDialog(): void {
     this.dialogMode = 'add';
+    
     this.administrateurForm.reset();
     this.displayDialog = true;
   }
 
   closeDialog(): void {
     this.displayDialog = false;
+    this.selectedAdministrateur = null;
     this.administrateurForm.reset();
   }
+
+  // async saveAdministrateur(): Promise<void> {
+  //   try {
+      
+  //     const formValue = this.administrateurForm.value;
+  
+  //     // Générer un mot de passe temporaire (vous pourriez aussi envoyer un email de bienvenue)
+  //     const temporaryPassword = this.generateTemporaryPassword();
+  
+  //     // 1. Créer l'utilisateur dans Supabase Auth
+  //     const { data: authData, error: authError } = await this.supabaseService.signUp(
+  //       formValue.email,
+  //       temporaryPassword
+  //     );
+  
+  //     if (authError) {
+  //       this.toastService.showError('Erreur', authError.message || 'Erreur lors de la création du compte');
+  //       return;
+  //     }
+  
+  //     // 2. Insérer l'utilisateur dans la table Users
+  //     const userData = {
+  //       auth_id: authData.user?.id || '',
+  //       first_name: formValue.prenoms,
+  //       last_name: formValue.nom,
+  //       email: formValue.email,
+  //       phone_number: formValue.contact,
+  //       role: formValue.role,
+  //       statut: true,
+  //       created_at: new Date().toISOString(),
+  //       updated_at: new Date().toISOString()
+  //     };
+  
+  //     await this.supabaseService.insertData('users', userData);
+  
+  //     // 3. Afficher un message de succès
+  //     this.toastService.showSuccess(
+  //       'Succès', 
+  //       `Administrateur "${formValue.prenoms} ${formValue.nom}" créé avec succès`
+  //     );
+  
+  //     // 4. Fermer le dialog et rafraîchir la liste
+  //     this.closeDialog();
+  //     await this.getAdministrators();
+  
+  //   } catch (error: any) {
+  //     this.toastService.showError('Erreur', error.message || 'Erreur lors de la création de l\'administrateur');
+  //     console.error('Erreur lors de la création de l\'administrateur:', error);
+  //   }
+  // }
+
+
 
   async saveAdministrateur(): Promise<void> {
     try {
       
       const formValue = this.administrateurForm.value;
+      console.log('mode',this.dialogMode)
+      console.log('user to edit', this.selectedAdministrateur)
   
-      // Générer un mot de passe temporaire (vous pourriez aussi envoyer un email de bienvenue)
-      const temporaryPassword = this.generateTemporaryPassword();
-  
-      // 1. Créer l'utilisateur dans Supabase Auth
-      const { data: authData, error: authError } = await this.supabaseService.signUp(
-        formValue.email,
-        temporaryPassword
-      );
-  
-      if (authError) {
-        this.toastService.showError('Erreur', authError.message || 'Erreur lors de la création du compte');
-        return;
+      if (this.dialogMode === 'edit' && this.selectedAdministrateur) {
+        // MODE ÉDITION - Mettre à jour un administrateur existant
+        console.log("mode editing")
+        const userData: any = {
+          first_name: formValue.prenoms,
+          last_name: formValue.nom,
+          email: formValue.email,
+          phone_number: formValue.contact,
+          role: formValue.role,
+          updated_at: new Date().toISOString()
+        };
+
+        // Mettre à jour dans la table Users
+        await this.supabaseService.updateData(
+          'users', 
+          userData, 
+          this.selectedAdministrateur.id.toString()
+        );
+        // Si l'email a changé, mettre à jour dans Supabase Auth
+        if (formValue.email !== this.selectedAdministrateur.email && this.selectedAdministrateur.auth_id) {
+          const { error: authError } = await this.supabaseService.client.auth.admin.updateUserById(
+            this.selectedAdministrateur.auth_id,
+            { email: formValue.email }
+          );
+
+          if (authError) {
+            console.warn('Erreur lors de la mise à jour de l\'email dans Auth:', authError);
+            // Ne pas bloquer si l'update Auth échoue, on continue quand même
+          }
+        }
+
+        // Afficher un message de succès
+        this.toastService.showSuccess(
+          'Succès', 
+          `Administrateur "${formValue.prenoms} ${formValue.nom}" modifié avec succès`
+        );
+
+        // Fermer le dialog et rafraîchir la liste
+        this.closeDialog();
+        await this.getAdministrators();
+
+      } else {
+        // MODE AJOUT - Créer un nouvel administrateur
+        // Générer un mot de passe temporaire (vous pourriez aussi envoyer un email de bienvenue)
+        const temporaryPassword = this.generateTemporaryPassword();
+    
+        // 1. Créer l'utilisateur dans Supabase Auth
+        const { data: authData, error: authError } = await this.supabaseService.signUp(
+          formValue.email,
+          temporaryPassword
+        );
+    
+        if (authError) {
+          this.toastService.showError('Erreur', authError.message || 'Erreur lors de la création du compte');
+          return;
+        }
+    
+        // 2. Insérer l'utilisateur dans la table Users
+        const userData = {
+          auth_id: authData.user?.id || '',
+          first_name: formValue.prenoms,
+          last_name: formValue.nom,
+          email: formValue.email,
+          phone_number: formValue.contact,
+          role: formValue.role,
+          statut: true,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        await this.supabaseService.insertData('users', userData);
+    
+        // 3. Afficher un message de succès
+        this.toastService.showSuccess(
+          'Succès', 
+          `Administrateur "${formValue.prenoms} ${formValue.nom}" créé avec succès`
+        );
+    
+        // 4. Fermer le dialog et rafraîchir la liste
+        this.closeDialog();
+        await this.getAdministrators();
       }
   
-      // 2. Insérer l'utilisateur dans la table Users
-      const userData = {
-        auth_id: authData.user?.id || '',
-        first_name: formValue.prenoms,
-        last_name: formValue.nom,
-        email: formValue.email,
-        phone_number: formValue.contact,
-        role: formValue.role,
-        statut: true,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      };
-  
-      await this.supabaseService.insertData('users', userData);
-  
-      // 3. Afficher un message de succès
-      this.toastService.showSuccess(
-        'Succès', 
-        `Administrateur "${formValue.prenoms} ${formValue.nom}" créé avec succès`
-      );
-  
-      // 4. Fermer le dialog et rafraîchir la liste
-      this.closeDialog();
-      await this.getAdministrators();
-  
     } catch (error: any) {
-      this.toastService.showError('Erreur', error.message || 'Erreur lors de la création de l\'administrateur');
-      console.error('Erreur lors de la création de l\'administrateur:', error);
+      const action = this.dialogMode === 'edit' ? 'la modification' : 'la création';
+      this.toastService.showError('Erreur', error.message || `Erreur lors de ${action} de l'administrateur`);
+      console.error(`Erreur lors de ${action} de l'administrateur:`, error);
     }
   }
   
@@ -195,6 +269,7 @@ export class Administrateurs implements OnInit {
 
   editAdministrateur(administrateur: any): void {
     this.dialogMode = 'edit';
+    this.selectedAdministrateur = administrateur;
     this.administrateurForm.patchValue({
       nom: administrateur.last_name || '',
       prenoms: administrateur.first_name || '',
@@ -247,9 +322,10 @@ export class Administrateurs implements OnInit {
 
 
   onConfirmAction(event: Event) {
+    const action = this.dialogMode === 'add' ? 'créer' : 'modifier';
     this.confirmationService.confirm({
         target: event.target as EventTarget,
-        message: 'Vous êtes sur le point de créer un administrateur, voulez vous continuer ?',
+        message: `Vous êtes sur le point de ${action} un administrateur, voulez vous continuer ?`,
         header: 'Confirmation',
         closable: true,
         closeOnEscape: true,

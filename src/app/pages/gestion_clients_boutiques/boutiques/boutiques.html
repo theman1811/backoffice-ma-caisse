@@ -1,5 +1,6 @@
 <div class="p-6 bg-gray-50 min-h-screen">
   <!-- En-tête de la page -->
+  <p-confirmdialog />
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-2">Liste des boutiques</h1>
     <p class="text-gray-600">Consultez et gérez le statut des boutiques sur la plateforme</p>
@@ -7,41 +8,46 @@
 
   <!-- Table des boutiques -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <p-table [value]="boutiques" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
+    <p-table [value]="storeData" [tableStyle]="{'min-width': '90rem'}" styleClass="p-datatable-sm">
       <ng-template pTemplate="header">
         <tr class="bg-gray-50">
           <th class="text-left p-4 font-semibold text-gray-700">Nom de la boutique</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Pays</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Catégorie</th>
           <th class="text-left p-4 font-semibold text-gray-700">Propriétaire</th>
           <th class="text-left p-4 font-semibold text-gray-700">Nombre de vendeurs</th>
-          <th class="text-left p-4 font-semibold text-gray-700">Produits</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Devise</th>
           <th class="text-left p-4 font-semibold text-gray-700">Ventes</th>
           <th class="text-left p-4 font-semibold text-gray-700">Statut</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Date Création</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Date modification</th>
           <th class="text-left p-4 font-semibold text-gray-700">Actions</th>
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-boutique>
         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-          <td class="p-4 text-gray-800 font-medium">{{ boutique.nom }}</td>
-          <td class="p-4 text-gray-600">{{ boutique.proprietaire }}</td>
-          <td class="p-4 text-gray-600">{{ boutique.nbVendeurs }}</td>
-          <td class="p-4 text-gray-600">{{ boutique.produits }}</td>
-          <td class="p-4 text-green-600 font-medium">{{ boutique.ventes }}</td>
+          <td class="p-4 text-gray-800 font-medium">{{ boutique.name }}</td>
+          <td class="p-4 text-gray-800 font-medium">{{ boutique.name }}</td>
+          <td class="p-4 text-gray-800 font-medium">{{ boutique.name }}</td>
+          <td class="p-4 text-gray-600">{{ boutique.proprietaire || 'N/A' }}</td>
+          <td class="p-4 text-gray-600">{{ boutique.nbVendeurs || 'N/A' }}</td>
+          <td class="p-4 text-gray-600">{{ boutique.currency }}</td>
+          <td class="p-4 text-green-600 font-medium">{{ boutique.ventes || 'N/A' }}</td>
           <td class="p-4">
-            <p-tag 
-              [value]="boutique.statut" 
-              [severity]="boutique.statut === 'Active' ? 'success' : 'secondary'"
+            <!-- <p-tag 
+              [value]="boutique.is_active ? 'Active' : 'Inactive'" 
+              [severity]="boutique.is_active === true ? 'success' : 'secondary'"
               [rounded]="true">
-            </p-tag>
+            </p-tag> -->
+            <p-toggleswitch
+              [ngModel]="boutique.is_active"
+              (ngModelChange)="confirm1(boutique, $event)"
+              
+              />
           </td>
+          <td class="p-4 text-green-600 font-medium">{{ boutique.created_at || 'N/A' }}</td>
+          <td class="p-4 text-green-600 font-medium">{{ boutique.updated_at || 'N/A' }}</td>
           <td class="p-4">
-            <p-button 
-              [label]="boutique.statut === 'Active' ? 'Désactiver' : 'Activer'"
-              [severity]="boutique.statut === 'Active' ? 'danger' : 'info'"
-              [size]="'small'"
-              [icon]="boutique.statut === 'Active' ? 'pi pi-times' : 'pi pi-check'"
-              (onClick)="toggleStatut(boutique)"
-              styleClass="p-button-sm">
-            </p-button>
             <p-button><i class="pi pi-eye"></i></p-button>
           </td>
         </tr>
