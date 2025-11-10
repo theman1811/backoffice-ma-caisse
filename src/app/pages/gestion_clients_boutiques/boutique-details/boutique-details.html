@@ -1,0 +1,129 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+    <!-- En-tête avec bouton retour -->
+    <div class="mb-6">
+        <p-button 
+            icon="pi pi-arrow-left" 
+            label="Retour à la liste" 
+            (click)="goBack()" 
+            severity="secondary" 
+            [text]="true"
+            [outlined]="true">
+        </p-button>
+    </div>
+
+    <!-- État de chargement -->
+    <div *ngIf="loading" class="flex items-center justify-center py-12">
+        <div class="text-center">
+            <i class="pi pi-spin pi-spinner text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600">Chargement des détails...</p>
+        </div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="!loading && error" class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center">
+            <i class="pi pi-exclamation-triangle text-red-500 text-2xl mr-3"></i>
+            <div>
+                <h3 class="text-red-800 font-semibold mb-1">Erreur</h3>
+                <p class="text-red-600">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div *ngIf="!loading && !error && boutiqueOverview" class="space-y-6">
+        <!-- En-tête de la boutique -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ boutiqueOverview.boutique_name }}</h1>
+        </div>
+
+        <!-- Cartes de statistiques -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Total des transactions -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">Total des transactions</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ boutiqueOverview.total_transactions | number }}</p>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-4">
+                        <i class="pi pi-shopping-cart text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Montant total -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">Montant total</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ formatCurrency(boutiqueOverview.total_amount) }}</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-4">
+                        <i class="pi pi-money-bill text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total des utilisateurs -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">Total des utilisateurs</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ boutiqueOverview.total_users | number }}</p>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-4">
+                        <i class="pi pi-users text-purple-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des utilisateurs -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800">Utilisateurs de la boutique</h2>
+                <p class="text-sm text-gray-600 mt-1">Liste de tous les utilisateurs associés à cette boutique</p>
+            </div>
+            
+            <div *ngIf="boutiqueOverview.users && boutiqueOverview.users.length > 0; else noUsers">
+                <p-table 
+                    [value]="boutiqueOverview.users" 
+                    [tableStyle]="{'min-width': '50rem'}"
+                    styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header">
+                        <tr class="bg-gray-50">
+                            <th class="text-left p-4 font-semibold text-gray-700">ID</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Prénom</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Nom</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Email</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Rôle</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-user>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-4 text-gray-800 font-medium">{{ user.user_id }}</td>
+                            <td class="p-4 text-gray-800">{{ user.first_name }}</td>
+                            <td class="p-4 text-gray-800">{{ user.last_name }}</td>
+                            <td class="p-4 text-gray-600">{{ user.email }}</td>
+                            <td class="p-4">
+                                <p-tag 
+                                    [value]="user.role" 
+                                    [severity]="user.role === 'admin' ? 'danger' : user.role === 'manager' ? 'warning' : 'info'"
+                                    [rounded]="true">
+                                </p-tag>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+            
+            <ng-template #noUsers>
+                <div class="p-12 text-center">
+                    <i class="pi pi-users text-gray-300 text-5xl mb-4"></i>
+                    <p class="text-gray-600 text-lg">Aucun utilisateur associé à cette boutique</p>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>

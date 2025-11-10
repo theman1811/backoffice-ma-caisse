@@ -8,6 +8,8 @@ import { ToggleSwitchModule } from 'primeng/toggleswitch';
 import { FormsModule } from '@angular/forms';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
+import { Router } from '@angular/router';
+import { TooltipModule } from 'primeng/tooltip';
 
 interface Boutik {
   nom: string;
@@ -26,7 +28,8 @@ interface Boutik {
     ButtonModule,
     ToggleSwitchModule,
     FormsModule,
-    ConfirmDialogModule
+    ConfirmDialogModule,
+    TooltipModule
   ],
   templateUrl: './boutiques.html',
   styleUrl: './boutiques.scss'
@@ -34,6 +37,7 @@ interface Boutik {
 export class Boutiques implements OnInit {
   supabaseService = inject(SupabaseService)
   confirmationService = inject(ConfirmationService)
+  private router = inject(Router)
 
   toggleStatut(boutique: Boutik): void {
     boutique.statut = boutique.statut === 'Active' ? 'Inactive' : 'Active';
@@ -128,4 +132,33 @@ export class Boutiques implements OnInit {
         },
     });
 }
+
+  formatDate(date: string | null | undefined): string {
+    if (!date) {
+      return 'N/A';
+    }
+    
+    try {
+      const dateObj = new Date(date);
+      if (isNaN(dateObj.getTime())) {
+        return 'N/A';
+      }
+      
+      const day = String(dateObj.getDate()).padStart(2, '0');
+      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
+      const year = dateObj.getFullYear();
+      const hours = String(dateObj.getHours()).padStart(2, '0');
+      const minutes = String(dateObj.getMinutes()).padStart(2, '0');
+      
+      return `${day}/${month}/${year} ${hours}:${minutes}`;
+    } catch (error) {
+      return 'N/A';
+    }
+  }
+
+  showBoutiqueDetails(boutique: Boutique): void {
+    if (boutique.id) {
+      this.router.navigate(['/gestion/boutiques', boutique.id]);
+    }
+  }
 }

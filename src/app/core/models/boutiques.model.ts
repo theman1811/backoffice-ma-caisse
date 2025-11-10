@@ -12,3 +12,24 @@ export interface Boutique {
 
 
 export type getBoutiquesResponse= Boutique[]
+
+
+export interface BoutiqueOverviewUser {
+  user_id: number;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
+}
+
+export interface BoutiqueOverview {
+  boutique_id: number;
+  boutique_name: string;
+  total_transactions: number;
+  total_amount: number;
+  total_users: number;
+  users: BoutiqueOverviewUser[];
+}
+
+export type GetBoutiquesOverviewResponse = BoutiqueOverview[];
+
