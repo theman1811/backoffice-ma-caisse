@@ -1,5 +1,7 @@
 <div class="p-6 bg-gray-50 min-h-screen">
   <!-- En-tête de la page -->
+  <p-confirmdialog />
+  <p-toast></p-toast>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-2">Liste des clients</h1>
     <p class="text-gray-600">Gérez les comptes utilisateurs et leur statut d'activation</p>
@@ -7,39 +9,45 @@
 
   <!-- Table des utilisateurs -->
   <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <p-table [value]="utilisateurs" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
+    <p-table [value]="clientsData" [tableStyle]="{'min-width': '50rem'}" styleClass="p-datatable-sm">
       <ng-template pTemplate="header">
         <tr class="bg-gray-50">
-          <th class="text-left p-4 font-semibold text-gray-700">Nom</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Nom complet</th>
           <th class="text-left p-4 font-semibold text-gray-700">Email</th>
-          <th class="text-left p-4 font-semibold text-gray-700">Nombre de Boutiques</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Téléphone</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Total Boutiques</th>
+          <th class="text-left p-4 font-semibold text-gray-700">Boutiques possédées</th>
           <th class="text-left p-4 font-semibold text-gray-700">Statut</th>
           <th class="text-left p-4 font-semibold text-gray-700">Date d'inscription</th>
-          <th class="text-left p-4 font-semibold text-gray-700">Actions</th>
+          <th class="text-left p-4 font-semibold text-gray-700"></th>
         </tr>
       </ng-template>
-      <ng-template pTemplate="body" let-utilisateur>
+      <ng-template pTemplate="body" let-client>
         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-          <td class="p-4 text-gray-800 font-medium">{{ utilisateur.nom }}</td>
-          <td class="p-4 text-gray-600">{{ utilisateur.email }}</td>
-          <td class="p-4 text-gray-600">{{ utilisateur.boutique }}</td>
+          <td class="p-4 text-gray-800 font-medium">{{ client.full_name }}</td>
+          <td class="p-4 text-gray-600">{{ client.email }}</td>
+          <td class="p-4 text-gray-600">{{ client.phone_number || 'N/A' }}</td>
+          <td class="p-4 text-gray-600">{{ client.total_boutiques }}</td>
+          <td class="p-4 text-gray-600">{{ client.total_boutiques_owned }}</td>
           <td class="p-4">
-            <p-tag 
-              [value]="utilisateur.statut" 
-              [severity]="utilisateur.statut === 'Actif' ? 'success' : 'secondary'"
-              [rounded]="true">
-            </p-tag>
+            <p-toggleswitch 
+              [(ngModel)]="client.is_active" 
+              (ngModelChange)="confirmEditStatu(client, $event)" />
           </td>
-          <td class="p-4 text-gray-600">{{ utilisateur.dateInscription }}</td>
+          <td class="p-4 text-gray-600">{{ client?.dateInscription || 'N/A' }}</td>
           <td class="p-4">
-            <p-button 
-              [label]="utilisateur.statut === 'Actif' ? 'Désactiver' : 'Activer'"
-              [severity]="utilisateur.statut === 'Actif' ? 'danger' : 'info'"
+            @if(client.total_boutiques > 0){
+              <p-button 
+              pTooltip="Voir détails"
+              tooltipPosition="top"
+              icon="pi pi-eye"
               [size]="'small'"
-              [icon]="utilisateur.statut === 'Actif' ? 'pi pi-user-minus' : 'pi pi-user-plus'"
-              (onClick)="toggleStatut(utilisateur)"
+              severity="info"
+              [text]="true"
+              (onClick)="viewClientDetails(client)"
               styleClass="p-button-sm">
-            </p-button>
+              </p-button>
+            }
           </td>
         </tr>
       </ng-template>

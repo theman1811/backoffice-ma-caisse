@@ -30,7 +30,6 @@ import { Toast } from "primeng/toast";
 export class Login {
   email: string = '';
   password: string = '';
-  checked: boolean = false;
   supabaseService= inject(SupabaseService)
   toastService= inject(ToastService)
   router= inject(Router)

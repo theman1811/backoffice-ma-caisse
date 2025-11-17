@@ -1,6 +1,7 @@
 <div class="p-6 bg-gray-50 min-h-screen">
     <!-- En-tête de la page -->
     <p-confirmdialog />
+    <p-toast></p-toast>
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-800 mb-2">Liste des boutiques</h1>
         <p class="text-gray-600">Consultez et gérez le statut des boutiques sur la plateforme</p>
@@ -27,10 +28,10 @@
                     <td class="p-4 text-gray-800 font-medium">{{ boutique.categorie }}</td>
                     <td class="p-4 text-gray-600">{{ boutique.currency }}</td>
                     <td class="p-4" (click)="$event.stopPropagation()">
-                        <p-toggleswitch [ngModel]="boutique.is_active" (ngModelChange)="confirm1(boutique, $event)" />
+                        <p-toggleswitch [(ngModel)]="boutique.is_active" (ngModelChange)="confirm1(boutique, $event)" />
                     </td>
-                    <td class="p-4 text-green-600 font-medium">{{ formatDate(boutique.created_at) }}</td>
-                    <td class="p-4 text-green-600 font-medium">{{ formatDate(boutique.updated_at) }}</td>
+                    <td class="p-4 text-gray-600 font-medium">{{ formatDate(boutique.created_at) }}</td>
+                    <td class="p-4 text-gray-600 font-medium">{{ formatDate(boutique.updated_at) }}</td>
                 </tr>
             </ng-template>
         </p-table>

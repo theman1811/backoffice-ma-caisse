@@ -10,6 +10,8 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService } from 'primeng/api';
 import { Router } from '@angular/router';
 import { TooltipModule } from 'primeng/tooltip';
+import { ToastService } from '@/core/services/toasts.service';
+import { ToastModule } from 'primeng/toast';
 
 interface Boutik {
   nom: string;
@@ -29,7 +31,8 @@ interface Boutik {
     ToggleSwitchModule,
     FormsModule,
     ConfirmDialogModule,
-    TooltipModule
+    TooltipModule,
+    ToastModule
   ],
   templateUrl: './boutiques.html',
   styleUrl: './boutiques.scss'
@@ -37,6 +40,7 @@ interface Boutik {
 export class Boutiques implements OnInit {
   supabaseService = inject(SupabaseService)
   confirmationService = inject(ConfirmationService)
+  toastService= inject(ToastService)
   private router = inject(Router)
 
   toggleStatut(boutique: Boutik): void {
@@ -98,9 +102,11 @@ export class Boutiques implements OnInit {
         throw error;
       }
 
+      this.toastService.showSuccess('Succès', 'Opération effectuée avec succès!!')
       this.getBoutiques()
-    } catch (err) {
+    } catch (err) { 
       boutique.is_active = previous; // revert si erreur
+      this.toastService.showError('Echec', "Une erreur inconnue est survenue lors de l'opération, veuillez rééssayer plus tard!!")
       console.error('Erreur lors de la mise à jour du statut:', err);
     }
   }
@@ -108,7 +114,7 @@ export class Boutiques implements OnInit {
 
 
   confirm1(boutique:Boutique, event: boolean) {
-    console.log('event', event)
+    const previousValue = boutique.is_active; // Sauvegarder la valeur précédente
     this.confirmationService.confirm({
         // target: event.target as EventTarget,
         message: 'Êtes vous sûr de Vouloir modifier le statut?',
@@ -128,7 +134,8 @@ export class Boutiques implements OnInit {
             this.onToggleActive(boutique, event)
         },
         reject: () => {
-            return
+            boutique.is_active= previousValue
+            this.getBoutiques()
         },
     });
 }

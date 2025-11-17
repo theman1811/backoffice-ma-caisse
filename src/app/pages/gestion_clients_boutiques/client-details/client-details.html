@@ -1,0 +1,154 @@
+<div class="p-6 bg-gray-50 min-h-screen">
+    <!-- En-tête avec bouton retour -->
+    <div class="mb-6">
+        <p-button 
+            icon="pi pi-arrow-left" 
+            label="Retour à la liste" 
+            (click)="goBack()" 
+            severity="secondary" 
+            [text]="true"
+            [outlined]="true">
+        </p-button>
+    </div>
+
+    <!-- État de chargement -->
+    <div *ngIf="loading" class="flex items-center justify-center py-12">
+        <div class="text-center">
+            <i class="pi pi-spin pi-spinner text-4xl text-gray-400 mb-4"></i>
+            <p class="text-gray-600">Chargement des détails...</p>
+        </div>
+    </div>
+
+    <!-- Message d'erreur -->
+    <div *ngIf="!loading && error" class="bg-red-50 border border-red-200 rounded-lg p-6 mb-6">
+        <div class="flex items-center">
+            <i class="pi pi-exclamation-triangle text-red-500 text-2xl mr-3"></i>
+            <div>
+                <h3 class="text-red-800 font-semibold mb-1">Erreur</h3>
+                <p class="text-red-600">{{ error }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div *ngIf="!loading && !error && client" class="space-y-6">
+        <!-- En-tête du client -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-800 mb-2">{{ client.full_name }}</h1>
+                    <p class="text-gray-600">{{ client.email }}</p>
+                </div>
+                <div>
+                    <p-tag 
+                        [value]="client.is_active ? 'Actif' : 'Inactif'" 
+                        [severity]="client.is_active ? 'success' : 'secondary'"
+                        [rounded]="true">
+                    </p-tag>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informations du client -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Téléphone -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">Téléphone</p>
+                        <p class="text-xl font-semibold text-gray-800">{{ client.phone_number || 'N/A' }}</p>
+                    </div>
+                    <div class="bg-blue-100 rounded-full p-4">
+                        <i class="pi pi-phone text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total des boutiques -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">Total des boutiques</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ client.total_boutiques | number }}</p>
+                    </div>
+                    <div class="bg-green-100 rounded-full p-4">
+                        <i class="pi pi-shopping-bag text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boutiques possédées -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-2">Boutiques possédées</p>
+                        <p class="text-3xl font-bold text-gray-800">{{ client.total_boutiques_owned | number }}</p>
+                    </div>
+                    <div class="bg-purple-100 rounded-full p-4">
+                        <i class="pi pi-briefcase text-purple-600 text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des boutiques -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-800">Boutiques du client</h2>
+                <p class="text-sm text-gray-600 mt-1">Liste de toutes les boutiques associées à ce client</p>
+            </div>
+            
+            <div *ngIf="client.boutiques_details && client.boutiques_details.length > 0; else noBoutiques">
+                <p-table 
+                    [value]="client.boutiques_details" 
+                    [tableStyle]="{'min-width': '50rem'}"
+                    styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header">
+                        <tr class="bg-gray-50">
+                            <th class="text-left p-4 font-semibold text-gray-700">ID</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Nom de la boutique</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Rôle</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Pays</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Catégorie</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Devise</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Statut</th>
+                            <th class="text-left p-4 font-semibold text-gray-700">Date de création</th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-boutique>
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="p-4 text-gray-800 font-medium">{{ boutique.boutique_id }}</td>
+                            <td class="p-4 text-gray-800 font-medium">{{ boutique.boutique_name }}</td>
+                            <td class="p-4">
+                                <p-tag 
+                                    [value]="boutique.role" 
+                                    [severity]="boutique.role === 'owner' ? 'danger' : boutique.role === 'manager' ? 'warning' : 'info'"
+                                    [rounded]="true">
+                                </p-tag>
+                            </td>
+                            <td class="p-4 text-gray-600">{{ boutique.country }}</td>
+                            <td class="p-4 text-gray-600">{{ boutique.categorie }}</td>
+                            <td class="p-4 text-gray-600">{{ boutique.currency || 'N/A' }}</td>
+                            <td class="p-4">
+                                <p-tag 
+                                    [value]="boutique.is_active ? 'Actif' : 'Inactif'" 
+                                    [severity]="boutique.is_active ? 'success' : 'secondary'"
+                                    [rounded]="true">
+                                </p-tag>
+                            </td>
+                            <td class="p-4 text-gray-600">{{ formatDate(boutique.created_at) }}</td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+            
+            <ng-template #noBoutiques>
+                <div class="p-12 text-center">
+                    <i class="pi pi-shopping-bag text-gray-300 text-5xl mb-4"></i>
+                    <p class="text-gray-600 text-lg">Aucune boutique associée à ce client</p>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
+
