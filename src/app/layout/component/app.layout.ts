@@ -1,11 +1,13 @@
-import { Component, Renderer2, ViewChild } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Renderer2, ViewChild, OnInit, PLATFORM_ID, inject } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { filter, Subscription } from 'rxjs';
 import { AppTopBar } from './app-top-bar/app-top-bar';
 import { AppSidebar } from './app.sidebar';
 import { AppFooter } from './app.footer';
 import { LayoutService } from '../service/layout.service';
+import { $t } from '@primeuix/themes';
+import Lara from '@primeuix/themes/lara';
 
 @Component({
     selector: 'app-layout',
@@ -23,7 +25,7 @@ import { LayoutService } from '../service/layout.service';
         <div class="layout-mask animate-fadein"></div>
     </div> `
 })
-export class AppLayout {
+export class AppLayout implements OnInit {
     overlayMenuOpenSubscription: Subscription;
 
     menuOutsideClickListener: any;
@@ -31,6 +33,8 @@ export class AppLayout {
     @ViewChild(AppSidebar) appSidebar!: AppSidebar;
 
     @ViewChild(AppTopBar) appTopBar!: AppTopBar;
+
+    platformId = inject(PLATFORM_ID);
 
     constructor(
         public layoutService: LayoutService,
@@ -54,6 +58,61 @@ export class AppLayout {
         this.router.events.pipe(filter((event) => event instanceof NavigationEnd)).subscribe(() => {
             this.hideMenu();
         });
+    }
+
+    ngOnInit() {
+        // Initialiser le thème au démarrage si on est dans le navigateur
+        if (isPlatformBrowser(this.platformId)) {
+            this.initializeTheme();
+        }
+    }
+
+    private initializeTheme() {
+        const config = this.layoutService.layoutConfig();
+        const preset = Lara;
+        const presetPalette = preset.primitive;
+        const colorName = config.primary || 'sky';
+        const colorPalette = presetPalette?.[colorName as keyof typeof presetPalette];
+        
+        if (colorPalette) {
+            const themeConfig = {
+                semantic: {
+                    primary: colorPalette,
+                    colorScheme: {
+                        light: {
+                            primary: {
+                                color: '{primary.500}',
+                                contrastColor: '#ffffff',
+                                hoverColor: '{primary.600}',
+                                activeColor: '{primary.700}'
+                            },
+                            highlight: {
+                                background: '{primary.50}',
+                                focusBackground: '{primary.100}',
+                                color: '{primary.700}',
+                                focusColor: '{primary.800}'
+                            }
+                        },
+                        dark: {
+                            primary: {
+                                color: '{primary.400}',
+                                contrastColor: '{surface.900}',
+                                hoverColor: '{primary.300}',
+                                activeColor: '{primary.200}'
+                            },
+                            highlight: {
+                                background: 'color-mix(in srgb, {primary.400}, transparent 84%)',
+                                focusBackground: 'color-mix(in srgb, {primary.400}, transparent 76%)',
+                                color: 'rgba(255,255,255,.87)',
+                                focusColor: 'rgba(255,255,255,.87)'
+                            }
+                        }
+                    }
+                }
+            };
+            
+            $t().preset(preset).preset(themeConfig).surfacePalette(null).use({ useDefaultOptions: true });
+        }
     }
 
     isOutsideClicked(event: MouseEvent) {
